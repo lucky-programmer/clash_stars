@@ -10,7 +10,6 @@ minScreenWidth = -100
 maxScreenWidth = screen_width
 bulletStopValue = -10000
 
-
 pygame.mixer.pre_init(44100, -16, 2, 2048)
 pygame.mixer.init()
 explosionSound = pygame.mixer.Sound("musics/laser1.wav")
@@ -119,7 +118,23 @@ def randomMusicSelector():
     pygame.mixer.music.stop()
     pygame.mixer.music.play(loops=1, start =random.randint(5,120) )
 
+potionX = {}
+potionY = {}
+def drawPotionsRandomly(screen, potionImage):
+    x = random.randint(0,screen_width)
+    y = random.randint(0,screen_height)
 
+    if potionImage in potionX:
+        x = potionX[potionImage]
+    else:
+        potionX[potionImage] = x
+    
+    if potionImage in potionY:
+        y = potionY[potionImage]
+    else:
+        potionY[potionImage] = y
+
+    screen.blit(potionImage, (x, y))  
 
 def run():
     pygame.init()
@@ -141,6 +156,13 @@ def run():
     bullet2 = pygame.transform.flip(bullet2, True, False)
     explosionImage = pygame.image.load("images/explosion-effect.png")
     theDub = pygame.image.load("images/the_dub.png")
+
+
+    redhealingpotion = pygame.image.load("images/redhealingpotion.png")
+    yellowhealingpotion = pygame.image.load("images/yellowhealingpotion.webp")
+    megahealingpotion = pygame.image.load("images/megahealingpotion.png")
+    orangehealingpotion = pygame.image.load("images/orangehealingpotion.png")
+
     theDub = pygame.transform.scale(theDub, ((int)(800*0.8), (int)(268*0.8) ) )
     player1X=0
     player1Y=screen_height/2
@@ -163,6 +185,11 @@ def run():
     while run:
 
         drawBackground(screen, background1)
+        drawPotionsRandomly(screen, redhealingpotion)
+        drawPotionsRandomly(screen, orangehealingpotion)
+        drawPotionsRandomly(screen, megahealingpotion)
+        drawPotionsRandomly(screen, yellowhealingpotion)
+
         pressed = pygame.key.get_pressed()
 
         if player1HP > 0:
