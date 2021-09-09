@@ -40,6 +40,9 @@ def updatePlayer1PositionWithKeyInput(pressed, playerX, playerY, bulletX, bullet
         bulletY = playerY - 40
         bulletX = playerX
 
+    if (pressed[K_ESCAPE]):
+        exit()
+
     if bulletX >= 0 and bulletX != bulletStopValue:
         bulletX = bulletX + 10
 
@@ -95,7 +98,7 @@ def checkCollision(x1,y1, x2, y2):
 def run():
     pygame.init()
 
-    screen = pygame.display.set_mode((screen_width, screen_height))
+    screen = pygame.display.set_mode((screen_width, screen_height), pygame.HWSURFACE|pygame.DOUBLEBUF)
     pygame.display.set_caption("Clash Stars")
 
     player1Image = pygame.image.load("images/colt.png")
@@ -200,6 +203,7 @@ def run():
         pygame.draw.rect(screen, (0, 255, 0), (screen_width - (100*5+20), 20, 100*player2HP, 50) )
 
         pygame.display.update()
+        pygame.display.flip()
         
 
     pygame.quit()
