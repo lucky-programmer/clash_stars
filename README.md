@@ -4,11 +4,11 @@ python based clash stars made by grade 7 and 5
 
 # How to play: 
 
-## PLAYER ONE
+## PLAYER ONE (LEFT PLAYER)
 Move: W,A,S,D  
 Shoot: SHIFT 
 
-## PLAYER TWO
+## PLAYER TWO (RIGHT PLAYER)
 Move: DOWN ARROW, UP ARROW, RIGHT ARROW, LEFT ARROW 
 Shoot: SPACE BAR
 
