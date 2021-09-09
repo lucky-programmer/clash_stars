@@ -1,12 +1,20 @@
 import pygame
 from pygame.cursors import thickarrow_strings
 from pygame.locals import *
+import pygame.mixer
+import random
 
 screen_width = 1400
 screen_height = 700
 minScreenWidth = -100
 maxScreenWidth = screen_width
 bulletStopValue = -10000
+
+
+pygame.mixer.pre_init(44100, -16, 2, 2048)
+pygame.mixer.init()
+explosionSound = pygame.mixer.Sound("musics/laser1.wav")
+gunshotSound = pygame.mixer.Sound("musics/gunshot1.mp3")
 
 def showExplosionEffect(screen, explosionImage, fxFrame, bulletX, bulletY):
     if fxFrame == -1:
@@ -39,6 +47,7 @@ def updatePlayer1PositionWithKeyInput(pressed, playerX, playerY, bulletX, bullet
     if (pressed[K_LSHIFT] and bulletX == bulletStopValue) :
         bulletY = playerY - 40
         bulletX = playerX
+        gunshotSound.play()
 
     if (pressed[K_ESCAPE]):
         exit()
@@ -68,6 +77,7 @@ def updatePlayer2PositionWithKeyInput(pressed, playerX, playerY, bulletX, bullet
     if (pressed[K_SPACE] and bulletX == bulletStopValue) :
         bulletY = playerY - 40
         bulletX = playerX
+        gunshotSound.play()
 
     if bulletX >= minScreenWidth and bulletX != bulletStopValue:
         bulletX = bulletX - 10  
@@ -92,11 +102,28 @@ def checkCollision(x1,y1, x2, y2):
         return False
 
     distance = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) 
-    return distance < 10000
+    
+    if (distance < 10000):
+        explosionSound.play()
+        return True
+    else:
+        return False
+    
+
+def randomMusicSelector():
+    if random.randint(0,10) < 5:
+        pygame.mixer.music.load("musics/bgm1.mp3")
+    else:
+        pygame.mixer.music.load("musics/bme.mp3")
+
+    pygame.mixer.music.stop()
+    pygame.mixer.music.play(loops=1, start =random.randint(5,120) )
+
 
 
 def run():
     pygame.init()
+
 
     screen = pygame.display.set_mode((screen_width, screen_height), pygame.HWSURFACE|pygame.DOUBLEBUF)
     pygame.display.set_caption("Clash Stars")
@@ -131,7 +158,8 @@ def run():
 
     player1HP = 5       
     player2HP = 5
-
+    randomMusicSelector()
+    
     while run:
 
         drawBackground(screen, background1)
@@ -169,6 +197,8 @@ def run():
 
             player1HP = 5       
             player2HP =5
+            
+            randomMusicSelector()
 
 
         if player1HP > 0:
@@ -202,9 +232,7 @@ def run():
         pygame.draw.rect(screen, (0, 255, 0), (20, 20, 100*player1HP, 50) )
         pygame.draw.rect(screen, (0, 255, 0), (screen_width - (100*5+20), 20, 100*player2HP, 50) )
 
-        pygame.display.update()
         pygame.display.flip()
-        
 
     pygame.quit()
 
