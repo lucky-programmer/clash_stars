@@ -1,3 +1,4 @@
+from time import time
 import pygame
 from pygame.cursors import thickarrow_strings
 from pygame.locals import *
@@ -30,7 +31,7 @@ def showExplosionEffect(screen, explosionImage, fxFrame, bulletX, bulletY):
 
     return fxFrame
 
-def updatePlayer1PositionWithKeyInput(pressed, playerX, playerY, bulletX, bulletY):
+def updatePlayer1PositionWithKeyInput(pressed, playerX, playerY, frame, lastGunFiredTime, multishot):
     if (pressed[K_a] and playerX > 0) :
         playerX = playerX - 1
 
@@ -43,21 +44,27 @@ def updatePlayer1PositionWithKeyInput(pressed, playerX, playerY, bulletX, bullet
     if (pressed[K_s] and playerY < 600) :
         playerY = playerY + 1
 
-    if (pressed[K_LSHIFT] and bulletX == bulletStopValue) :
-        bulletY = playerY - 40
-        bulletX = playerX
-        gunshotSound.play()
+    gunFired=0
+
+    if (pressed[K_1]) :
+        multishot=1
+
+    if (pressed[K_LSHIFT]) :
+        if multishot > 0 and (frame - lastGunFiredTime) > 80:
+            gunshotSound.play()
+            gunFired=1
+            lastGunFiredTime = frame
+        elif (frame - lastGunFiredTime) > 400:
+            gunshotSound.play()
+            gunFired=1
+            lastGunFiredTime = frame
+
+
 
     if (pressed[K_ESCAPE]):
         exit()
 
-    if bulletX >= 0 and bulletX != bulletStopValue:
-        bulletX = bulletX + 10
-
-    if maxScreenWidth < bulletX:
-        bulletX = bulletStopValue
-
-    return [playerX, playerY, bulletX, bulletY]
+    return [playerX, playerY, gunFired, lastGunFiredTime, multishot]
 
 def updatePlayer2PositionWithKeyInput(pressed, playerX, playerY, bulletX, bulletY, player2HP):
     if (pressed[K_LEFT] and playerX > 630) :
@@ -79,7 +86,7 @@ def updatePlayer2PositionWithKeyInput(pressed, playerX, playerY, bulletX, bullet
         gunshotSound.play()
 
     if bulletX >= minScreenWidth and bulletX != bulletStopValue:
-        bulletX = bulletX - 10  
+        bulletX = bulletX - 3 
 
     if bulletX < minScreenWidth:
         bulletX = bulletStopValue
@@ -115,26 +122,11 @@ def randomMusicSelector():
     else:
         pygame.mixer.music.load("musics/bme.mp3")
 
-    pygame.mixer.music.stop()
-    pygame.mixer.music.play(loops=1, start =random.randint(5,120) )
-
-potionX = {}
-potionY = {}
-def drawPotionsRandomly(screen, potionImage):
-    x = random.randint(0,screen_width)
-    y = random.randint(0,screen_height)
-
-    if potionImage in potionX:
-        x = potionX[potionImage]
-    else:
-        potionX[potionImage] = x
     
-    if potionImage in potionY:
-        y = potionY[potionImage]
-    else:
-        potionY[potionImage] = y
+    pygame.mixer.music.play(loops=1, start=4)
+    pygame.mixer.music.play(loops=1, start=4)
 
-    screen.blit(potionImage, (x, y))  
+
 
 def run():
     pygame.init()
@@ -156,23 +148,18 @@ def run():
     bullet2 = pygame.transform.flip(bullet2, True, False)
     explosionImage = pygame.image.load("images/explosion-effect.png")
     theDub = pygame.image.load("images/the_dub.png")
-
-
-    redhealingpotion = pygame.image.load("images/redhealingpotion.png")
-    yellowhealingpotion = pygame.image.load("images/yellowhealingpotion.webp")
-    megahealingpotion = pygame.image.load("images/megahealingpotion.png")
-    orangehealingpotion = pygame.image.load("images/orangehealingpotion.png")
-
     theDub = pygame.transform.scale(theDub, ((int)(800*0.8), (int)(268*0.8) ) )
     player1X=0
     player1Y=screen_height/2
     player2X=screen_width - 100
     player2Y=screen_height/2
 
-    bullet1X = bulletStopValue
-    bullet1Y = 50
+    bullet1X = [bulletStopValue] * 100
+    bullet1Y = [50] * 100
     bullet2X = bulletStopValue
     bullet2Y = 50
+
+    bullet1Idx=0
 
     run = True
     fxFrame1 = -1
@@ -182,22 +169,38 @@ def run():
     player2HP = 5
     randomMusicSelector()
     
+    frame=0
+    lastGunFiredTime=0
+    multishot=0
+
     while run:
-
+        frame=frame+1
         drawBackground(screen, background1)
-        drawPotionsRandomly(screen, redhealingpotion)
-        drawPotionsRandomly(screen, orangehealingpotion)
-        drawPotionsRandomly(screen, megahealingpotion)
-        drawPotionsRandomly(screen, yellowhealingpotion)
-
         pressed = pygame.key.get_pressed()
 
         if player1HP > 0:
-            positions = updatePlayer1PositionWithKeyInput(pressed, player1X, player1Y, bullet1X, bullet1Y)
+            positions = updatePlayer1PositionWithKeyInput(pressed, player1X, player1Y, frame, lastGunFiredTime, multishot)
             player1X = positions[0]
             player1Y = positions[1]
-            bullet1X = positions[2]
-            bullet1Y = positions[3]
+            isGunFired = positions[2]
+            lastGunFiredTime = positions[3]
+            multishot = multishot + positions[4]
+            
+            if isGunFired == 1:
+                bullet1X[bullet1Idx] = player1X
+                bullet1Y[bullet1Idx] = player1Y - 40
+                
+                bullet1Idx = bullet1Idx + 1
+                if bullet1Idx > 99:
+                    bullet1Idx = 0
+            
+            for i in range(0, 100):
+                if bullet1X[i] >= minScreenWidth and bullet1X[i] != bulletStopValue:
+                    bullet1X[i] = bullet1X[i] + 3
+
+                if bullet1X[i] < minScreenWidth:
+                    bullet1X[i] = bulletStopValue
+
 
         if player2HP > 0:
             positions = updatePlayer2PositionWithKeyInput(pressed, player2X, player2Y, bullet2X, bullet2Y, player2HP)
@@ -213,8 +216,8 @@ def run():
             player2X=screen_width - 100
             player2Y=screen_height/2
 
-            bullet1X = bulletStopValue
-            bullet1Y = 50
+            bullet1X = [bulletStopValue]*100
+            bullet1Y = [50]*100
             bullet2X = bulletStopValue
             bullet2Y = 50
 
@@ -235,16 +238,20 @@ def run():
             drawPlayer(screen, player2Image, player2X, player2Y)
         
         if player1HP > 0 and player2HP > 0:
-            drawBullet(screen, bullet1, bullet1X, bullet1Y)
+
+            for i in range(0, 100):
+                drawBullet(screen, bullet1, bullet1X[i], bullet1Y[i])
+
             drawBullet(screen, bullet2, bullet2X, bullet2Y)
 
         if areBothPlayersAlive(player1HP, player2HP) and fxFrame2 == -1 and checkCollision(player1X+50, player1Y+50, bullet2X+173, bullet2Y+112) == True:
             fxFrame2 = 0
             player1HP = player1HP - 1    
         
-        if areBothPlayersAlive(player1HP, player2HP) and fxFrame1 == -1 and checkCollision(player2X+50, player2Y+50, bullet1X+173, bullet1Y+112) == True:
-            fxFrame1 = 0
-            player2HP = player2HP - 1
+        for i in range(0, 100):
+            if areBothPlayersAlive(player1HP, player2HP) and fxFrame1 == -1 and checkCollision(player2X+50, player2Y+50, bullet1X[i]+173, bullet1Y[i]+112) == True:
+                fxFrame1 = 0
+                player2HP = player2HP - 1
 
         if player1HP<=0 or player2HP<=0 :
             screen.blit(theDub, (500, 100))
