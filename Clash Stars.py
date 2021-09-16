@@ -66,7 +66,7 @@ def updatePlayer1PositionWithKeyInput(pressed, playerX, playerY, frame, lastGunF
 
     return [playerX, playerY, gunFired, lastGunFiredTime, multishot]
 
-def updatePlayer2PositionWithKeyInput(pressed, playerX, playerY, bulletX, bulletY, player2HP):
+def updatePlayer2PositionWithKeyInput(pressed, playerX, playerY, frame, lastGunFiredTime, multishot):
     if (pressed[K_LEFT] and playerX > 630) :
         playerX = playerX - 1
 
@@ -80,18 +80,22 @@ def updatePlayer2PositionWithKeyInput(pressed, playerX, playerY, bulletX, bullet
         playerY = playerY + 1
 
 
-    if (pressed[K_SPACE] and bulletX == bulletStopValue) :
-        bulletY = playerY - 40
-        bulletX = playerX
-        gunshotSound.play()
+    gunFired=0
 
-    if bulletX >= minScreenWidth and bulletX != bulletStopValue:
-        bulletX = bulletX - 3 
+    if (pressed[K_RSHIFT]) :
+        multishot=1
 
-    if bulletX < minScreenWidth:
-        bulletX = bulletStopValue
+    if (pressed[K_SPACE]) :
+        if multishot > 0 and (frame - lastGunFiredTime) > 80:
+            gunshotSound.play()
+            gunFired=1
+            lastGunFiredTime = frame
+        elif (frame - lastGunFiredTime) > 400:
+            gunshotSound.play()
+            gunFired=1
+            lastGunFiredTime = frame
 
-    return [playerX, playerY, bulletX, bulletY, player2HP]
+    return [playerX, playerY, gunFired, lastGunFiredTime, multishot]
 
 def drawBackground(screen, backgroundImage):
     screen.blit(backgroundImage, (0,0))    
@@ -156,10 +160,11 @@ def run():
 
     bullet1X = [bulletStopValue] * 100
     bullet1Y = [50] * 100
-    bullet2X = bulletStopValue
-    bullet2Y = 50
+    bullet2X = [bulletStopValue]*100
+    bullet2Y = [50]*100
 
     bullet1Idx=0
+    bullet2Idx=0
 
     run = True
     fxFrame1 = -1
@@ -172,6 +177,8 @@ def run():
     frame=0
     lastGunFiredTime=0
     multishot=0
+    lastGunFiredTime2=0
+    multishot2=0
 
     while run:
         frame=frame+1
@@ -203,12 +210,27 @@ def run():
 
 
         if player2HP > 0:
-            positions = updatePlayer2PositionWithKeyInput(pressed, player2X, player2Y, bullet2X, bullet2Y, player2HP)
+            positions = updatePlayer2PositionWithKeyInput(pressed, player2X, player2Y, frame, lastGunFiredTime2, multishot2)
             player2X = positions[0]
             player2Y = positions[1]
-            bullet2X = positions[2]
-            bullet2Y = positions[3]
-            player2HP = positions[4]
+            isGunFired = positions[2]
+            lastGunFiredTime2 = positions[3]
+            multishot2 = multishot2 + positions[4]
+            
+            if isGunFired == 1:
+                bullet2X[bullet2Idx] = player2X-150
+                bullet2Y[bullet2Idx] = player2Y - 40
+                
+                bullet2Idx = bullet2Idx + 1
+                if bullet2Idx > 99:
+                    bullet2Idx = 0
+            
+            for i in range(0, 100):
+                if bullet2X[i] >= minScreenWidth and bullet2X[i] != bulletStopValue:
+                    bullet2X[i] = bullet2X[i] - 3
+
+                if bullet2X[i] < minScreenWidth:
+                    bullet2X[i] = bulletStopValue
 
         if areBothPlayersAlive(player1HP, player2HP)==False and pressed[K_l] :
             player1X=0
@@ -218,8 +240,8 @@ def run():
 
             bullet1X = [bulletStopValue]*100
             bullet1Y = [50]*100
-            bullet2X = bulletStopValue
-            bullet2Y = 50
+            bullet2X = [bulletStopValue]*100
+            bullet2Y = [50]*100
 
             run = True
             fxFrame1 = -1
@@ -241,14 +263,14 @@ def run():
 
             for i in range(0, 100):
                 drawBullet(screen, bullet1, bullet1X[i], bullet1Y[i])
-
-            drawBullet(screen, bullet2, bullet2X, bullet2Y)
-
-        if areBothPlayersAlive(player1HP, player2HP) and fxFrame2 == -1 and checkCollision(player1X+50, player1Y+50, bullet2X+173, bullet2Y+112) == True:
-            fxFrame2 = 0
-            player1HP = player1HP - 1    
+                drawBullet(screen, bullet2, bullet2X[i], bullet2Y[i])
+      
         
         for i in range(0, 100):
+            if areBothPlayersAlive(player1HP, player2HP) and fxFrame2 == -1 and checkCollision(player1X+50, player1Y+50, bullet2X[i]+173, bullet2Y[i]+112) == True:
+                fxFrame2 = 0
+                player1HP = player1HP - 1  
+
             if areBothPlayersAlive(player1HP, player2HP) and fxFrame1 == -1 and checkCollision(player2X+50, player2Y+50, bullet1X[i]+173, bullet1Y[i]+112) == True:
                 fxFrame1 = 0
                 player2HP = player2HP - 1
