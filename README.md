@@ -1,5 +1,5 @@
 # clash_stars
-python based clash stars made by grade 7 and 5
+Pygame created by a smart G5 Lucky Programmer    (not telling my real name you psychos)
 
 
 # How to play: 
