@@ -13,7 +13,7 @@ bulletStopValue = -10000
 playerSpeed = 4
 bulletSpeed=14
 bulletDelay=0.01
-playerHP=20
+playerHP=100
 pygame.mixer.pre_init(44100, -16, 2, 2048)
 pygame.mixer.init()
 explosionSound = pygame.mixer.Sound("musics/laser1.wav")
@@ -57,7 +57,7 @@ def updatePlayer1PositionWithKeyInput(pressed, playerX, playerY, frame, lastGunF
             gunshotSound.play()
             gunFired=1
             lastGunFiredTime = frame
-        elif (frame - lastGunFiredTime) > 200 or lastGunFiredTime == 0:
+        elif (frame - lastGunFiredTime) > 60 or lastGunFiredTime == 0:
             gunshotSound.play()
             gunFired=1
             lastGunFiredTime = frame
@@ -91,7 +91,7 @@ def updatePlayer2PositionWithKeyInput(pressed, playerX, playerY, frame, lastGunF
             gunshotSound.play()
             gunFired=1
             lastGunFiredTime = frame
-        elif (frame - lastGunFiredTime) > 200 or lastGunFiredTime == 0:
+        elif (frame - lastGunFiredTime) > 60 or lastGunFiredTime == 0:
             gunshotSound.play()
             gunFired=1
             lastGunFiredTime = frame
