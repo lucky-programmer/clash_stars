@@ -12,7 +12,7 @@ maxScreenWidth = screen_width
 bulletStopValue = -10000
 playerSpeed = 4
 bulletSpeed=14
-bulletDelay=20
+bulletDelay=0.01
 playerHP=20
 pygame.mixer.pre_init(44100, -16, 2, 2048)
 pygame.mixer.init()
@@ -175,8 +175,9 @@ def run():
     bullet2Idx=0
 
     run = True
-    fxFrame1 = -1
-    fxFrame2 = -1
+    
+    fxFrame1 = [-1]*100
+    fxFrame2 = [-1]*100
 
     player1HP = playerHP
     player2HP = playerHP
@@ -251,8 +252,8 @@ def run():
             bullet2X = [bulletStopValue]*100
             bullet2Y = [50]*100
 
-            fxFrame1 = -1
-            fxFrame2 = -1
+            fxFrame1 = [-1]*100
+            fxFrame2 = [-1]*100
 
             player1HP = playerHP    
             player2HP = playerHP
@@ -274,19 +275,20 @@ def run():
       
         
         for i in range(0, 100):
-            if areBothPlayersAlive(player1HP, player2HP) and fxFrame2 == -1 and checkCollision(player1X+50, player1Y+50, bullet2X[i]+173, bullet2Y[i]+112) == True:
-                fxFrame2 = 0
+            if areBothPlayersAlive(player1HP, player2HP) and fxFrame2[i] == -1 and checkCollision(player1X+50, player1Y+50, bullet2X[i]+173, bullet2Y[i]+112) == True:
+                fxFrame2[i] = 0
                 player1HP = player1HP - 1  
 
-            if areBothPlayersAlive(player1HP, player2HP) and fxFrame1 == -1 and checkCollision(player2X+50, player2Y+50, bullet1X[i]+173, bullet1Y[i]+112) == True:
-                fxFrame1 = 0
+            if areBothPlayersAlive(player1HP, player2HP) and fxFrame1[i] == -1 and checkCollision(player2X+50, player2Y+50, bullet1X[i]+173, bullet1Y[i]+112) == True:
+                fxFrame1[i] = 0
                 player2HP = player2HP - 1
 
         if player1HP<=0 or player2HP<=0 :
             screen.blit(theDub, (500, 100))
 
-        fxFrame1 = showExplosionEffect(screen, explosionImage, fxFrame1, player2X-100, player2Y)
-        fxFrame2 = showExplosionEffect(screen, explosionImage, fxFrame2, player1X, player1Y)
+        for i in range(0, 100):
+            fxFrame1[i] = showExplosionEffect(screen, explosionImage, fxFrame1[i], player2X-100, player2Y)
+            fxFrame2[i] = showExplosionEffect(screen, explosionImage, fxFrame2[i], player1X, player1Y)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
