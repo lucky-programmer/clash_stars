@@ -10,7 +10,10 @@ screen_height = 700
 minScreenWidth = -100
 maxScreenWidth = screen_width
 bulletStopValue = -10000
-
+playerSpeed = 4
+bulletSpeed=14
+bulletDelay=20
+playerHP=20
 pygame.mixer.pre_init(44100, -16, 2, 2048)
 pygame.mixer.init()
 explosionSound = pygame.mixer.Sound("musics/laser1.wav")
@@ -33,16 +36,16 @@ def showExplosionEffect(screen, explosionImage, fxFrame, bulletX, bulletY):
 
 def updatePlayer1PositionWithKeyInput(pressed, playerX, playerY, frame, lastGunFiredTime, multishot):
     if (pressed[K_a] and playerX > 0) :
-        playerX = playerX - 1
+        playerX = playerX - playerSpeed
 
     if (pressed[K_d] and playerX < 600) :
-        playerX = playerX + 1
+        playerX = playerX + playerSpeed
 
     if (pressed[K_w] and playerY > 0) :
-        playerY = playerY -  1
+        playerY = playerY -  playerSpeed
 
     if (pressed[K_s] and playerY < 600) :
-        playerY = playerY + 1
+        playerY = playerY + playerSpeed
 
     gunFired=0
 
@@ -50,16 +53,14 @@ def updatePlayer1PositionWithKeyInput(pressed, playerX, playerY, frame, lastGunF
         multishot=1
 
     if (pressed[K_LSHIFT]) :
-        if multishot > 0 and (frame - lastGunFiredTime) > 80:
+        if multishot > 0 and (frame - lastGunFiredTime) > bulletDelay:
             gunshotSound.play()
             gunFired=1
             lastGunFiredTime = frame
-        elif (frame - lastGunFiredTime) > 400:
+        elif (frame - lastGunFiredTime) > bulletDelay*5 or lastGunFiredTime == 0:
             gunshotSound.play()
             gunFired=1
             lastGunFiredTime = frame
-
-
 
     if (pressed[K_ESCAPE]):
         exit()
@@ -68,16 +69,16 @@ def updatePlayer1PositionWithKeyInput(pressed, playerX, playerY, frame, lastGunF
 
 def updatePlayer2PositionWithKeyInput(pressed, playerX, playerY, frame, lastGunFiredTime, multishot):
     if (pressed[K_LEFT] and playerX > 630) :
-        playerX = playerX - 1
+        playerX = playerX - playerSpeed
 
     if (pressed[K_RIGHT] and playerX < 1300) :
-        playerX = playerX + 1
+        playerX = playerX + playerSpeed
 
     if (pressed[K_UP] and playerY > 0) :
-        playerY = playerY - 1
+        playerY = playerY - playerSpeed
 
     if (pressed[K_DOWN] and playerY < 600) :
-        playerY = playerY + 1
+        playerY = playerY + playerSpeed
 
 
     gunFired=0
@@ -86,11 +87,11 @@ def updatePlayer2PositionWithKeyInput(pressed, playerX, playerY, frame, lastGunF
         multishot=1
 
     if (pressed[K_SPACE]) :
-        if multishot > 0 and (frame - lastGunFiredTime) > 80:
+        if multishot > 0 and (frame - lastGunFiredTime) > bulletDelay:
             gunshotSound.play()
             gunFired=1
             lastGunFiredTime = frame
-        elif (frame - lastGunFiredTime) > 400:
+        elif (frame - lastGunFiredTime) > bulletDelay*5 or lastGunFiredTime == 0:
             gunshotSound.play()
             gunFired=1
             lastGunFiredTime = frame
@@ -127,32 +128,39 @@ def randomMusicSelector():
         pygame.mixer.music.load("musics/bme.mp3")
 
     
-    pygame.mixer.music.play(loops=1, start=4)
-    pygame.mixer.music.play(loops=1, start=4)
+    pygame.mixer.music.play(loops=-1, start=random.randint(4,120))
 
+def display_fps(screen, clock, font, color):
+    pass
+    # text_to_show = font.render(str(int(clock.get_fps())), 0, color)
+    # screen.blit(text_to_show, (0,0))
 
 
 def run():
     pygame.init()
 
+    clock = pygame.time.Clock()
+    # font = pygame.font.SysFont("Arial", 18)
+    # color = pygame.Color("White")
 
     screen = pygame.display.set_mode((screen_width, screen_height), pygame.HWSURFACE|pygame.DOUBLEBUF)
     pygame.display.set_caption("Clash Stars")
 
     player1Image = pygame.image.load("images/colt.png")
-    player1Image = pygame.transform.scale(player1Image, (100,100))
+    player1Image = pygame.transform.scale(player1Image, (100,100)).convert_alpha()
 
     player2Image = pygame.image.load("images/colt.png")
     player2Image = pygame.transform.scale(player2Image, (100,100))
-    player2Image = pygame.transform.flip(player2Image, True, False)
+    player2Image = pygame.transform.flip(player2Image, True, False).convert_alpha()
 
     background1 = pygame.image.load("images/background1.jpg")
-    bullet1 = pygame.image.load("images/laser-bullet.png")
+    background1 = pygame.transform.scale(background1, (screen_width, screen_height) ).convert()
+    bullet1 = pygame.image.load("images/laser-bullet.png").convert_alpha()
     bullet2 = pygame.image.load("images/laser-bullet.png")
-    bullet2 = pygame.transform.flip(bullet2, True, False)
-    explosionImage = pygame.image.load("images/explosion-effect.png")
+    bullet2 = pygame.transform.flip(bullet2, True, False).convert_alpha()
+    explosionImage = pygame.image.load("images/explosion-effect.png").convert_alpha()
     theDub = pygame.image.load("images/the_dub.png")
-    theDub = pygame.transform.scale(theDub, ((int)(800*0.8), (int)(268*0.8) ) )
+    theDub = pygame.transform.scale(theDub, ((int)(800*0.8), (int)(268*0.8) ) ).convert_alpha()
     player1X=0
     player1Y=screen_height/2
     player2X=screen_width - 100
@@ -170,8 +178,8 @@ def run():
     fxFrame1 = -1
     fxFrame2 = -1
 
-    player1HP = 5       
-    player2HP = 5
+    player1HP = playerHP
+    player2HP = playerHP
     randomMusicSelector()
     
     frame=0
@@ -203,7 +211,7 @@ def run():
             
             for i in range(0, 100):
                 if bullet1X[i] >= minScreenWidth and bullet1X[i] != bulletStopValue:
-                    bullet1X[i] = bullet1X[i] + 3
+                    bullet1X[i] = bullet1X[i] + bulletSpeed
 
                 if bullet1X[i] < minScreenWidth:
                     bullet1X[i] = bulletStopValue
@@ -227,7 +235,7 @@ def run():
             
             for i in range(0, 100):
                 if bullet2X[i] >= minScreenWidth and bullet2X[i] != bulletStopValue:
-                    bullet2X[i] = bullet2X[i] - 3
+                    bullet2X[i] = bullet2X[i] - bulletSpeed
 
                 if bullet2X[i] < minScreenWidth:
                     bullet2X[i] = bulletStopValue
@@ -243,12 +251,11 @@ def run():
             bullet2X = [bulletStopValue]*100
             bullet2Y = [50]*100
 
-            run = True
             fxFrame1 = -1
             fxFrame2 = -1
 
-            player1HP = 5       
-            player2HP =5
+            player1HP = playerHP    
+            player2HP = playerHP
             
             randomMusicSelector()
 
@@ -285,10 +292,15 @@ def run():
             if event.type == pygame.QUIT:
                 run = False
         
-        pygame.draw.rect(screen, (0, 255, 0), (20, 20, 100*player1HP, 50) )
-        pygame.draw.rect(screen, (0, 255, 0), (screen_width - (100*5+20), 20, 100*player2HP, 50) )
+        pygame.draw.rect(screen, (0, 255, 0), (20, 20, (500/playerHP)*player1HP, 50) )
+        pygame.draw.rect(screen, (0, 255, 0), (screen_width - (100*5+20), 20, (500/playerHP)*player2HP, 50) )
 
-        pygame.display.flip()
+        #display_fps(screen, clock, font, color)
+
+        clock.tick(60)
+        pygame.display.update()
+        #pygame.display.flip()
+        #pygame.display.update()
 
     pygame.quit()
 
