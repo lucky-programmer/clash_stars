@@ -6,11 +6,13 @@ python based clash stars made by grade 7 and 5
 
 ## PLAYER ONE (LEFT PLAYER)
 Move: W,A,S,D  
-Shoot: SHIFT 
+Shoot: L-SHIFT 
+Cheat: 1
 
 ## PLAYER TWO (RIGHT PLAYER)
 Move: DOWN ARROW, UP ARROW, RIGHT ARROW, LEFT ARROW 
 Shoot: SPACE BAR
+Cheat: R-SHIFT
 
 ## Etc
 RESTART: L
