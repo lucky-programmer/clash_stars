@@ -57,7 +57,7 @@ def updatePlayer1PositionWithKeyInput(pressed, playerX, playerY, frame, lastGunF
             gunshotSound.play()
             gunFired=1
             lastGunFiredTime = frame
-        elif (frame - lastGunFiredTime) > bulletDelay*5 or lastGunFiredTime == 0:
+        elif (frame - lastGunFiredTime) > 200 or lastGunFiredTime == 0:
             gunshotSound.play()
             gunFired=1
             lastGunFiredTime = frame
@@ -68,7 +68,7 @@ def updatePlayer1PositionWithKeyInput(pressed, playerX, playerY, frame, lastGunF
     return [playerX, playerY, gunFired, lastGunFiredTime, multishot]
 
 def updatePlayer2PositionWithKeyInput(pressed, playerX, playerY, frame, lastGunFiredTime, multishot):
-    if (pressed[K_LEFT] and playerX > 630) :
+    if (pressed[K_LEFT] and playerX > 640) :
         playerX = playerX - playerSpeed
 
     if (pressed[K_RIGHT] and playerX < 1300) :
@@ -91,7 +91,7 @@ def updatePlayer2PositionWithKeyInput(pressed, playerX, playerY, frame, lastGunF
             gunshotSound.play()
             gunFired=1
             lastGunFiredTime = frame
-        elif (frame - lastGunFiredTime) > bulletDelay*5 or lastGunFiredTime == 0:
+        elif (frame - lastGunFiredTime) > 200 or lastGunFiredTime == 0:
             gunshotSound.play()
             gunFired=1
             lastGunFiredTime = frame
